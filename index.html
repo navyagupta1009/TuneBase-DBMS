@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TuneBase</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#121212;color:#eee;display:flex;min-height:100vh}
+nav{width:220px;background:#050505;padding:20px 14px;flex-shrink:0}nav h2{color:#1db954;margin:0 0 18px;padding:0 8px}
+nav a{display:block;padding:9px 10px;color:#bbb;text-decoration:none;border-radius:7px;margin:2px 0}nav a:hover,nav a.on{background:#242424;color:#fff}
+main{flex:1;padding:26px;min-width:0;overflow-x:auto}.muted{color:#aaa}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.card{background:#1e1e1e;padding:18px;border-radius:11px;text-decoration:none;color:#eee;border:1px solid #292929}.card b{display:block;font-size:28px;color:#1db954;margin-bottom:4px}
+.panel{background:#1e1e1e;border:1px solid #2b2b2b;border-radius:11px;padding:15px;margin:16px 0}
+form.fields{display:flex;flex-wrap:wrap;align-items:end;gap:12px}label{font-size:12px;color:#aaa;display:block;margin-bottom:5px}
+input,select{background:#292929;color:#eee;border:1px solid #444;border-radius:6px;padding:9px;min-width:150px;max-width:100%}
+button,.btn{display:inline-block;background:#1db954;color:#07150b;border:0;border-radius:20px;padding:9px 15px;cursor:pointer;font-weight:650;text-decoration:none;font-size:14px}
+.btn.alt,button.alt{background:#343434;color:#eee}.del{background:#a93226;color:#fff}.actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;margin-top:14px;min-width:650px}th,td{text-align:left;padding:10px;border-bottom:1px solid #303030;vertical-align:top}th{color:#aaa;font-weight:550}
+.notice{padding:11px 13px;border-radius:7px;margin:0 0 12px}.ok{background:#14532d}.err{background:#7f1d1d}
+.search{display:flex;gap:8px;align-items:center;margin:14px 0}.search input{min-width:220px}
+@media(max-width:650px){body{flex-direction:column}nav{width:100%}nav a{display:inline-block}main{padding:16px}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>♫ TuneBase</h2>
+  <a href="/" class="{{ 'on' if page == 'home' else '' }}">Home</a>
+  {% for name in table_names %}
+    <a href="{{ url_for('table_view', table_name=name) }}" class="{{ 'on' if page == 'table' and current_table == name else '' }}">{{ name.replace('_',' ') }}</a>
+  {% endfor %}
+</nav>
+<main>
+{% for category, message in get_flashed_messages(with_categories=true) %}
+  <div class="notice {{ category }}">{{ message }}</div>
+{% endfor %}
+
+{% if page == 'home' %}
+  <h1>Welcome to TuneBase</h1>
+  <p class="muted">Manage records in your existing MySQL database.</p>
+  <div class="cards">
+    {% for name in table_names %}
+      <a class="card" href="{{ url_for('table_view', table_name=name) }}">
+        <b>{{ counts.get(name, '—') }}</b>{{ name.replace('_',' ') }}
+      </a>
+    {% endfor %}
+  </div>
+  <p class="muted" style="margin-top:22px">This app connects to the existing TuneBase database. It does not create or reset tables.</p>
+{% else %}
+  <h1>{{ current_table.replace('_',' ') }}</h1>
+  <p class="muted">Add, edit, search, or delete records. Deleting a record may affect related rows according to your database's foreign-key rules.</p>
+
+  <div class="panel">
+    <h3 style="margin-top:0">{{ 'Edit record' if edit else 'Add a record' }}</h3>
+    <form class="fields" method="post">
+      {% if edit %}<input type="hidden" name="key" value="{{ edit_key }}">{% endif %}
+      <input type="hidden" name="action" value="save">
+      {% for col, label, kind, fk in cfg.fields %}
+        <div>
+          <label for="{{ col }}">{{ label }}</label>
+          {% if kind == 'fk' %}
+            <select id="{{ col }}" name="{{ col }}" required>
+              <option value="">Choose {{ label|lower }}</option>
+              {% for opt in opts.get(col, []) %}
+                <option value="{{ opt.id }}" {% if edit and edit[col]|string == opt.id|string %}selected{% endif %}>{{ opt.name }}</option>
+              {% endfor %}
+            </select>
+          {% elif kind == 'password' %}
+            <input id="{{ col }}" name="{{ col }}" type="password" {% if not edit %}required{% endif %} placeholder="{{ 'Leave blank to keep current password' if edit else 'Set a password' }}">
+          {% else %}
+            <input id="{{ col }}" name="{{ col }}" type="{{ kind }}" value="{{ edit[col] if edit and edit[col] is not none else '' }}" {% if col not in ['country','genre','release_date'] %}required{% endif %}>
+          {% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit">{{ 'Update' if edit else 'Add record' }}</button>
+      {% if edit %}<a class="btn alt" href="{{ url_for('table_view', table_name=current_table) }}">Cancel</a>{% endif %}
+    </form>
+  </div>
+
+  <form class="search" method="get">
+    <input name="q" value="{{ q }}" placeholder="Search this table...">
+    <button class="alt" type="submit">Search</button>
+    {% if q %}<a class="btn alt" href="{{ url_for('table_view', table_name=current_table) }}">Clear</a>{% endif %}
+  </form>
+
+  <table>
+    <thead><tr>
+      {% for col in cfg.columns %}
+        {% if col != 'password_hash' %}<th>{{ col.replace('_',' ') }}</th>{% endif %}
+      {% endfor %}
+      <th>Actions</th>
+    </tr></thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+        {% for col in cfg.columns %}
+          {% if col != 'password_hash' %}<td>{{ row[col] if row[col] is not none else '' }}</td>{% endif %}
+        {% endfor %}
+        <td><div class="actions">
+          <a class="btn alt" href="{{ url_for('table_view', table_name=current_table, edit=row['_key']) }}">Edit</a>
+          <form method="post" onsubmit="return confirm('Delete this record? This may also delete related records.')" style="display:inline">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="key" value="{{ row['_key'] }}">
+            <button class="del" type="submit">Delete</button>
+          </form>
+        </div></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="{{ cfg.columns|length + 1 }}">No records found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+</main>
+</body>
+</html>
