@@ -45,8 +45,16 @@ TuneBase-DBMS/
 ├── templates/
 │   └── index.html
 ├── docs/
-│   ├── ER_Diagram.png
-│   └── project-report.pdf
+│   ├── interface(1).png
+│   ├── interface(2).png
+│   ├── interface(3).png
+│   ├── interface(4).png
+│   ├── interface(5).png
+│   ├── interface(6).png
+│   ├── interface(7).png
+│   ├── interface(8).png
+│   ├── interface(9).png
+│   └── presentation.pdf
 └── .gitignore
 ```
 
@@ -128,6 +136,3 @@ The dashboard opened successfully during local testing. CRUD operations passed f
 - Do not upload virtual environments such as `venv/` or `.venv/`.
 - The Flask development server is intended for local testing and demonstration, not production deployment.
 
-## Authors
-
-Add the project team members' names here.
