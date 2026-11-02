@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register | TuneBase</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 25px 0;
+    font-family: system-ui, sans-serif;
+    background: #121212;
+    color: white;
+}
+
+.container {
+    width: 90%;
+    max-width: 480px;
+    background: #1e1e1e;
+    border: 1px solid #303030;
+    border-radius: 18px;
+    padding: 32px;
+}
+
+.logo {
+    color: #1db954;
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+}
+
+h2 { text-align: center; margin-bottom: 5px; }
+
+.subtitle {
+    color: #aaa;
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+label {
+    display: block;
+    color: #bbb;
+    font-size: 13px;
+    margin: 12px 0 5px;
+}
+
+input {
+    width: 100%;
+    padding: 11px;
+    background: #292929;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 7px;
+    font-size: 14px;
+}
+
+button {
+    width: 100%;
+    padding: 13px;
+    margin-top: 22px;
+    border: none;
+    border-radius: 25px;
+    background: #1db954;
+    color: #07150b;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+button:hover { background: #1ed760; }
+
+a { color: #1db954; text-decoration: none; }
+
+.footer {
+    color: #aaa;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.notice {
+    padding: 10px;
+    border-radius: 7px;
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+.err { background: #7f1d1d; }
+.ok { background: #14532d; }
+
+.hint {
+    font-size: 11px;
+    color: #888;
+    margin-top: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">♫ TuneBase</div>
+
+    <h2>Create Account</h2>
+    <p class="subtitle">Join TuneBase and explore your music world.</p>
+
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+        <div class="notice {{ category }}">{{ message }}</div>
+    {% endfor %}
+
+    <form method="POST" action="{{ url_for('register') }}">
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <label>First Name *</label>
+        <input type="text" name="first_name" maxlength="50" required>
+
+        <label>Last Name *</label>
+        <input type="text" name="last_name" maxlength="50" required>
+
+        <label>Username *</label>
+        <input type="text" name="username" maxlength="50"
+               autocomplete="username" required>
+
+        <label>Email *</label>
+        <input type="email" name="email" maxlength="100"
+               autocomplete="email" required>
+
+        <label>Date of Birth *</label>
+        <input type="date" name="date_of_birth" required>
+
+        <label>Phone Numbers</label>
+        <input type="text" name="phone_numbers"
+               placeholder="9876543210, 9876543211">
+        <div class="hint">
+            Optional. Separate multiple phone numbers with commas.
+        </div>
+
+        <label>Password *</label>
+        <input type="password" name="password"
+               minlength="8" autocomplete="new-password" required>
+
+        <label>Confirm Password *</label>
+        <input type="password" name="confirm_password"
+               minlength="8" autocomplete="new-password" required>
+
+        <button type="submit">CREATE ACCOUNT</button>
+
+    </form>
+
+    <div class="footer">
+        Already have an account?
+        <a href="{{ url_for('login') }}">Login</a>
+    </div>
+
+</div>
+
+</body>
+</html>
