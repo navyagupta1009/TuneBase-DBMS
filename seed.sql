@@ -96,6 +96,45 @@ VALUES
 (14, 5, 3, '2026-03-16 17:20:00'),
 (15, 1, 1, '2026-03-17 08:00:00');
 
+UPDATE Users SET
+    first_name = 'Aarav',
+    last_name = 'Sharma',
+    date_of_birth = '2004-05-12'
+WHERE user_id = 1;
+
+UPDATE Users SET
+    first_name = 'Priya',
+    last_name = 'Verma',
+    date_of_birth = '2005-08-20'
+WHERE user_id = 2;
+
+UPDATE Users SET
+    first_name = 'Rohan',
+    last_name = 'Mehta',
+    date_of_birth = '2004-11-15'
+WHERE user_id = 3;
+
+UPDATE Users SET
+    first_name = 'Ananya',
+    last_name = 'Gupta',
+    date_of_birth = '2005-03-10'
+WHERE user_id = 4;
+
+UPDATE Users SET
+    first_name = 'Kabir',
+    last_name = 'Malhotra',
+    date_of_birth = '2004-09-25'
+WHERE user_id = 5;
+
+INSERT INTO User_Phone_Numbers
+(user_id, phone_number)
+VALUES
+(1, '9876543210'),
+(1, '9876543211'),
+(2, '9876543212'),
+(2, '9876543213'),
+(3, '9876543214');
+
 -- Verify inserted data
 SELECT 'Users' AS table_name, COUNT(*) AS total FROM Users
 UNION ALL
@@ -112,3 +151,10 @@ UNION ALL
 SELECT 'Likes', COUNT(*) FROM Likes
 UNION ALL
 SELECT 'Listening_History', COUNT(*) FROM Listening_History;
+
+SELECT
+    U.username,
+    P.phone_number
+FROM Users U
+JOIN User_Phone_Numbers P
+ON U.user_id = P.user_id;
