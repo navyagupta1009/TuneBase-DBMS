@@ -93,5 +93,23 @@ CREATE TABLE Listening_History (
         ON DELETE CASCADE
 );
 
+ALTER TABLE Users
+ADD COLUMN first_name VARCHAR(50),
+ADD COLUMN last_name VARCHAR(50);
+
+ALTER TABLE Users
+ADD COLUMN date_of_birth DATE;
+
+CREATE TABLE User_Phone_Numbers (
+    phone_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    phone_number VARCHAR(20) NOT NULL,
+
+    UNIQUE (user_id, phone_number),
+
+    FOREIGN KEY (user_id)
+        REFERENCES Users(user_id)
+        ON DELETE CASCADE
+);
 
 SHOW TABLES;
